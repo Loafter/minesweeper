@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, hash, u32};
 
 pub enum OpenResult {
     Opening(u32),
@@ -12,14 +12,14 @@ pub struct MinedCell {
     open: bool,
 }
 impl MinedCell {
-   pub fn new() -> Box<dyn MinCell> {
+    pub fn new() -> Box<dyn MinCell> {
         return Box::new(MinedCell { open: false });
     }
 }
 
 impl MinCell for MinedCell {
     fn open(&mut self) -> OpenResult {
-        self.open=true;
+        self.open = true;
         OpenResult::Explode
     }
 }
@@ -45,7 +45,7 @@ impl EmptyCell {
         })
     }
 }
- impl Default for EmptyCell {
+impl Default for EmptyCell {
     fn default() -> Self {
         Self {
             open: false,
@@ -56,7 +56,7 @@ impl EmptyCell {
 
 impl MinCell for EmptyCell {
     fn open(&mut self) -> OpenResult {
-        self.open=true;
+        self.open = true;
         OpenResult::Opening(self.mines_around)
     }
 }
@@ -68,5 +68,23 @@ impl Display for EmptyCell {
         } else {
             write!(f, "?")
         }
+    }
+}
+
+pub struct Minesweeper {
+    mine_field: Vec<Vec<Box<dyn MinCell>>>,
+}
+
+impl Minesweeper {
+    pub fn new(width: usize, _height: usize, _countt: usize) {
+        let mut field = <Vec<Vec<Box<dyn MinCell>>>>::with_capacity(width + 2);
+        for _w in 0..field.capacity() {
+            let mut row = <Vec<Box<dyn MinCell>>>::with_capacity(width + 2);
+            for w in 0..row.capacity() {
+                row.push(EmptyCell::new());
+            }
+            field.push(row);
+        }
+        
     }
 }
