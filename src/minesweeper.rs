@@ -3,7 +3,6 @@ use rand::thread_rng;
 use std::any::Any;
 use std::collections::VecDeque;
 use std::fmt::Display;
-use std::hash::Hash;
 use std::usize;
 pub enum OpenResult {
     Opening(u32),
@@ -148,50 +147,21 @@ impl Display for Minesweeper {
 }
 
 impl Minesweeper {
-    pub fn new(width: usize, height: usize, mut _count: usize) -> Minesweeper {
+    pub fn new(height: usize, width: usize, mut _count: usize) -> Minesweeper {
         let total_cells = height * width;
         if _count > total_cells {
             panic!("panic: to much mines")
         }
 
-        let mut field = <Vec<Vec<Box<dyn MinCell>>>>::with_capacity(height);
-        for _h in 0..field.capacity() {
-            let mut row = <Vec<Box<dyn MinCell>>>::with_capacity(width);
-            for _w in 0..row.capacity() {
-                row.push(EmptyCell::new());
-            }
-            field.push(row);
-        }
-        let mut map_field = Vec::<(i64, i64)>::with_capacity(total_cells);
-        for y in 0..height as i64 {
-            for x in 0..width as i64 {
-                map_field.push((y, x));
-            }
-        }
+        let field = gen_field(height, width);
+        let mut map_field = create_vec_cord(total_cells, height, width);
         let mut ret_field = Minesweeper {
             mine_field: field,
             height: height,
             width: width,
         };
         map_field.shuffle(&mut thread_rng());
-        while _count > 0 {
-            let (j, i) = map_field.pop().unwrap();
-            ret_field.mine_field[j as usize][i as usize] = MinedCell::new();
-            _count -= 1;
-            for y in j - 1..=j + 1 {
-                for x in i - 1..=i + 1 {
-                    if ret_field.check_border(y, x) {
-                        if !ret_field.mine_field[y as usize][x as usize].is_mine() {
-                            let cell = ret_field.mine_field[y as usize][x as usize]
-                                .as_any()
-                                .downcast_mut::<EmptyCell>()
-                                .unwrap();
-                            cell.mines_around += 1;
-                        }
-                    }
-                }
-            }
-        }
+        place_mine(_count, map_field, &mut ret_field);
         ret_field
     }
     pub fn get_width_height(&self) -> (usize, usize) {
@@ -199,7 +169,7 @@ impl Minesweeper {
     }
 
     fn check_border(&self, y: i64, x: i64) -> bool {
-        x  >= 0 && y  >= 0 && x != self.width as i64 && y != self.height as i64
+        x >= 0 && y >= 0 && x != self.width as i64 && y != self.height as i64
     }
 
     pub fn open(&mut self, y: usize, x: usize) -> Option<OpenResult> {
@@ -207,7 +177,7 @@ impl Minesweeper {
             return None;
         }
         let res = self.mine_field[y][x].open();
-        /*if let OpenResult::Opening(0) = res {
+        if let OpenResult::Opening(0) = res {
             let mut deq: VecDeque<(usize, usize)> = VecDeque::new();
             deq.push_back((y, x));
             while !deq.is_empty() {
@@ -216,21 +186,64 @@ impl Minesweeper {
                 for j in y - 1..=y + 1 {
                     for i in x - 1..=x + 1 {
                         if self.check_border(j, i) {
-                            if !self.mine_field[j as usize][i as usize].is_mine()
-                                && !self.mine_field[j as usize][i as usize].is_open()
+                            let (j, i) = (j as usize, i as usize);
+                            if !self.mine_field[j][i].is_mine() && !self.mine_field[j][i].is_open()
                             {
-                                self.mine_field[j as usize][i as usize].open();
-                                deq.push_front((j as usize, i as usize));
+                                self.mine_field[j][i].open();
+                                deq.push_front((j, i));
                             }
                         }
                     }
                 }
             }
-        }*/
+        }
         return Some(res);
     }
 
     pub fn mark(&mut self, y: usize, x: usize) {
         self.mine_field[y][x].mark()
     }
+}
+
+fn place_mine(mut _count: usize, mut map_field: Vec<(i64, i64)>, ret_field: &mut Minesweeper) {
+    while _count > 0 {
+        let (j, i) = map_field.pop().unwrap();
+        ret_field.mine_field[j as usize][i as usize] = MinedCell::new();
+        _count -= 1;
+        for y in j - 1..=j + 1 {
+            for x in i - 1..=i + 1 {
+                if ret_field.check_border(y, x) {
+                    if !ret_field.mine_field[y as usize][x as usize].is_mine() {
+                        let cell = ret_field.mine_field[y as usize][x as usize]
+                            .as_any()
+                            .downcast_mut::<EmptyCell>()
+                            .unwrap();
+                        cell.mines_around += 1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn create_vec_cord(total_cells: usize, height: usize, width: usize) -> Vec<(i64, i64)> {
+    let mut map_field = Vec::<(i64, i64)>::with_capacity(total_cells);
+    for y in 0..height as i64 {
+        for x in 0..width as i64 {
+            map_field.push((y, x));
+        }
+    }
+    map_field
+}
+
+fn gen_field(height: usize, width: usize) -> Vec<Vec<Box<dyn MinCell>>> {
+    let mut field = <Vec<Vec<Box<dyn MinCell>>>>::with_capacity(height);
+    for _h in 0..field.capacity() {
+        let mut row = <Vec<Box<dyn MinCell>>>::with_capacity(width);
+        for _w in 0..row.capacity() {
+            row.push(EmptyCell::new());
+        }
+        field.push(row);
+    }
+    field
 }

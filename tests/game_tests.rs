@@ -10,7 +10,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn newgame_panic_test() {
-        let m = Minesweeper::new(10, 10, 101);
+        Minesweeper::new(10, 10, 101);
     }
 
     #[test]
@@ -20,7 +20,7 @@ mod tests {
     }
 
     #[test]
-    fn game_open_test() {
+    fn game_allopen_test() {
         let mut g = Minesweeper::new(40, 20, 20);
         let (height, width) = g.get_width_height();
         let mut explode_count = 0;
@@ -35,6 +35,13 @@ mod tests {
         }
         println!("{}", g);
         println!("With exploded mines={}", explode_count);
+    }
+    #[test]
+    fn game_open_test() {
+        let mut g = Minesweeper::new(40, 40, 3);
+        println!("{}", g);
+        g.open(20, 10);
+        println!("{}", g);
     }
     #[test]
     fn game_mark_test() {
