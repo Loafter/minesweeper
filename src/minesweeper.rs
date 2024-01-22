@@ -11,7 +11,7 @@ pub enum OpenResult {
 
 pub trait MinCell: Display {
     fn open(&mut self) -> OpenResult;
-    fn mark(&mut self);
+    fn mark(&mut self) -> bool;
     fn is_marked(&self) -> bool;
     fn is_mine(&self) -> bool;
     fn is_open(&self) -> bool;
@@ -37,8 +37,9 @@ impl MinCell for MinedCell {
         OpenResult::Explode
     }
 
-    fn mark(&mut self) {
+    fn mark(&mut self) -> bool {
         self.marked = !self.marked;
+        return self.marked;
     }
 
     fn is_mine(&self) -> bool {
@@ -104,8 +105,9 @@ impl MinCell for EmptyCell {
         OpenResult::Opening(self.mines_around)
     }
 
-    fn mark(&mut self) {
+    fn mark(&mut self) -> bool {
         self.marked = !self.marked;
+        self.marked
     }
 
     fn is_mine(&self) -> bool {
@@ -144,6 +146,10 @@ impl Display for EmptyCell {
 pub struct Minesweeper {
     height: usize,
     width: usize,
+    total_mines: i64,
+    unarmed_mines: i64,
+    placed_flags: i64,
+
     mine_field: Vec<Vec<Box<dyn MinCell>>>,
 }
 
@@ -172,6 +178,9 @@ impl Minesweeper {
             mine_field: field,
             height: height,
             width: width,
+            total_mines: _count as i64,
+            unarmed_mines: 0,
+            placed_flags: 0,
         };
         map_field.shuffle(&mut thread_rng());
         place_mine(_count, map_field, &mut ret_field);
@@ -215,8 +224,23 @@ impl Minesweeper {
         return Some(res);
     }
 
-    pub fn mark(&mut self, y: usize, x: usize) {
-        self.mine_field[y][x].mark()
+    pub fn mark(&mut self, y: usize, x: usize) -> bool {
+        if self.mine_field[y][x].mark() {
+            if self.mine_field[y][x].is_mine() {
+                self.unarmed_mines -= 1;
+            }
+            self.placed_flags += 1;
+            if self.unarmed_mines == 0 && self.placed_flags == self.total_mines.try_into().unwrap() {
+                return true;
+            }
+            return false;
+        } else {
+            if self.mine_field[y][x].is_mine() {
+                self.unarmed_mines += 1;
+            }
+            self.placed_flags -= 1;
+            return false;
+        }
     }
 }
 
