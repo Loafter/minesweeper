@@ -21,21 +21,36 @@ mod tests {
 
     #[test]
     fn game_open_test() {
-        let mut g = Minesweeper::new(30, 30, 60);
+        let mut g = Minesweeper::new(40, 20, 20);
         let (height, width) = g.get_width_height();
+        let mut explode_count = 0;
+        println!("{}", g);
         for y in 0..height {
             for x in 0..width {
-                if let OpenResult::Explode = g.open(y, x) {
-                    println!("info: it's exploded");
-                    break;
+                if let Some(OpenResult::Explode) = g.open(y, x) {
+                    explode_count += 1;
+                    println!("info: it's exploded total count {}", explode_count);
                 }
             }
         }
         println!("{}", g);
+        println!("With exploded mines={}", explode_count);
     }
     #[test]
+    fn game_mark_test() {
+        let mut g = Minesweeper::new(15, 5, 10);
+        let (height, width) = g.get_width_height();
+        for y in 0..height / 2 {
+            for x in 0..width / 2 {
+                g.mark(y, x);
+            }
+        }
+        println!("{}", g);
+    }
+
+    #[test]
     fn game_display_test() {
-        let g = Minesweeper::new(30, 30, 60);
+        let g = Minesweeper::new(15, 20, 60);
         println!("{}", g);
     }
     #[test]
