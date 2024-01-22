@@ -5,7 +5,7 @@ use std::collections::VecDeque;
 use std::fmt::Display;
 use std::usize;
 pub enum OpenResult {
-    Opening(u32),
+    Opening(usize),
     Explode,
 }
 
@@ -15,6 +15,7 @@ pub trait MinCell: Display {
     fn is_marked(&self) -> bool;
     fn is_mine(&self) -> bool;
     fn is_open(&self) -> bool;
+    fn mines_arround(&self) -> usize;
     fn as_any(&mut self) -> &mut dyn Any;
 }
 pub struct MinedCell {
@@ -55,12 +56,18 @@ impl MinCell for MinedCell {
     fn as_any(&mut self) -> &mut dyn Any {
         self
     }
+
+    fn mines_arround(&self) -> usize {
+        1
+    }
 }
 
 impl Display for MinedCell {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.open {
             write!(f, "*")
+        } else if self.marked {
+            write!(f, "!")
         } else {
             write!(f, "?")
         }
@@ -70,7 +77,7 @@ impl Display for MinedCell {
 pub struct EmptyCell {
     open: bool,
     marked: bool,
-    mines_around: u32,
+    mines_around: usize,
 }
 impl EmptyCell {
     pub fn new() -> Box<dyn MinCell> {
@@ -116,12 +123,18 @@ impl MinCell for EmptyCell {
     fn as_any(&mut self) -> &mut dyn Any {
         self
     }
+
+    fn mines_arround(&self) -> usize {
+        self.mines_around
+    }
 }
 
 impl Display for EmptyCell {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.open {
             write!(f, "{}", self.mines_around)
+        } else if self.marked {
+            write!(f, "!")
         } else {
             write!(f, "?")
         }
@@ -190,7 +203,9 @@ impl Minesweeper {
                             if !self.mine_field[j][i].is_mine() && !self.mine_field[j][i].is_open()
                             {
                                 self.mine_field[j][i].open();
-                                deq.push_front((j, i));
+                                if self.mine_field[j][i].mines_arround() == 0 {
+                                    deq.push_front((j, i));
+                                }
                             }
                         }
                     }

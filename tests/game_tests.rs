@@ -38,14 +38,21 @@ mod tests {
     }
     #[test]
     fn game_open_test() {
-        let mut g = Minesweeper::new(40, 40, 3);
+        let mut g = Minesweeper::new(20, 60, 3);
         println!("{}", g);
-        g.open(20, 10);
+        g.open(10, 10);
+        println!("{}", g);
+    }
+    #[test]
+    fn game_open_many_test() {
+        let mut g = Minesweeper::new(20, 60, 100);
+        println!("{}", g);
+        g.open(10, 10);
         println!("{}", g);
     }
     #[test]
     fn game_mark_test() {
-        let mut g = Minesweeper::new(15, 5, 10);
+        let mut g = Minesweeper::new(10, 15, 10);
         let (height, width) = g.get_width_height();
         for y in 0..height / 2 {
             for x in 0..width / 2 {
