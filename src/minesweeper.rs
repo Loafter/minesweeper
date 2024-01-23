@@ -9,7 +9,34 @@ pub enum OpenResult {
     Explode,
 }
 
-pub trait MinCell: Display {
+type MineField = Vec<Vec<Box<dyn FieldCell>>>;
+pub trait GameRender {
+    fn render(&self,_field: &MineField);
+}
+pub struct TextRender {}
+
+impl GameRender for TextRender {
+    fn render(&self,_field: &MineField) {
+        for row in _field.iter() {
+            for el in row {
+                print!("{}",el);
+            }
+            println!("");
+        }
+    }
+}
+
+
+pub struct DummyRender {}
+
+impl GameRender for DummyRender {
+    fn render(&self,_field: &MineField) {
+      
+    }
+}
+
+
+pub trait FieldCell: Display {
     fn open(&mut self) -> OpenResult;
     fn mark(&mut self) -> bool;
     fn is_marked(&self) -> bool;
@@ -23,7 +50,7 @@ pub struct MinedCell {
     marked: bool,
 }
 impl MinedCell {
-    pub fn new() -> Box<dyn MinCell> {
+    pub fn new() -> Box<dyn FieldCell> {
         return Box::new(MinedCell {
             open: false,
             marked: false,
@@ -31,7 +58,7 @@ impl MinedCell {
     }
 }
 
-impl MinCell for MinedCell {
+impl FieldCell for MinedCell {
     fn open(&mut self) -> OpenResult {
         self.open = true;
         OpenResult::Explode
@@ -81,7 +108,7 @@ pub struct EmptyCell {
     mines_around: usize,
 }
 impl EmptyCell {
-    pub fn new() -> Box<dyn MinCell> {
+    pub fn new() -> Box<dyn FieldCell> {
         Box::new(EmptyCell {
             mines_around: 0,
             marked: false,
@@ -99,7 +126,7 @@ impl Default for EmptyCell {
     }
 }
 
-impl MinCell for EmptyCell {
+impl FieldCell for EmptyCell {
     fn open(&mut self) -> OpenResult {
         self.open = true;
         OpenResult::Opening(self.mines_around)
@@ -143,17 +170,17 @@ impl Display for EmptyCell {
     }
 }
 
-pub struct Minesweeper {
+pub struct Minesweeper<T: GameRender> {
     height: usize,
     width: usize,
     total_mines: i64,
     unarmed_mines: i64,
     placed_flags: i64,
-
-    mine_field: Vec<Vec<Box<dyn MinCell>>>,
+    mine_field: MineField,
+    render: T,
 }
 
-impl Display for Minesweeper {
+impl<T: GameRender> Display for Minesweeper<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for row in self.mine_field.iter() {
             for el in row {
@@ -163,10 +190,11 @@ impl Display for Minesweeper {
         }
         Ok(())
     }
+
 }
 
-impl Minesweeper {
-    pub fn new(height: usize, width: usize, mut _count: usize) -> Minesweeper {
+impl<T: GameRender> Minesweeper<T> {
+    pub fn new(height: usize, width: usize, mut _count: usize, render: T) -> Minesweeper<T> {
         let total_cells = height * width;
         if _count > total_cells {
             panic!("panic: to much mines")
@@ -181,9 +209,12 @@ impl Minesweeper {
             total_mines: _count as i64,
             unarmed_mines: 0,
             placed_flags: 0,
+            render: render,
         };
+        
         map_field.shuffle(&mut thread_rng());
         place_mine(_count, map_field, &mut ret_field);
+        ret_field.refresh();
         ret_field
     }
     pub fn get_width_height(&self) -> (usize, usize) {
@@ -221,6 +252,7 @@ impl Minesweeper {
                 }
             }
         }
+        self.refresh();
         return Some(res);
     }
 
@@ -230,21 +262,33 @@ impl Minesweeper {
                 self.unarmed_mines -= 1;
             }
             self.placed_flags += 1;
-            if self.unarmed_mines == 0 && self.placed_flags == self.total_mines.try_into().unwrap() {
+            if self.unarmed_mines == 0 && self.placed_flags == self.total_mines.try_into().unwrap()
+            {
                 return true;
             }
+            self.refresh();
             return false;
         } else {
             if self.mine_field[y][x].is_mine() {
                 self.unarmed_mines += 1;
             }
             self.placed_flags -= 1;
+            self.refresh();
             return false;
         }
     }
+    pub fn refresh(&self) {
+        self.render.render(&self.mine_field);
+    }
+
+
 }
 
-fn place_mine(mut _count: usize, mut map_field: Vec<(i64, i64)>, ret_field: &mut Minesweeper) {
+fn place_mine<T: GameRender>(
+    mut _count: usize,
+    mut map_field: Vec<(i64, i64)>,
+    ret_field: &mut Minesweeper<T>,
+) {
     while _count > 0 {
         let (j, i) = map_field.pop().unwrap();
         ret_field.mine_field[j as usize][i as usize] = MinedCell::new();
@@ -275,10 +319,10 @@ fn create_vec_cord(total_cells: usize, height: usize, width: usize) -> Vec<(i64,
     map_field
 }
 
-fn gen_field(height: usize, width: usize) -> Vec<Vec<Box<dyn MinCell>>> {
-    let mut field = <Vec<Vec<Box<dyn MinCell>>>>::with_capacity(height);
+fn gen_field(height: usize, width: usize) -> MineField {
+    let mut field = MineField::with_capacity(height);
     for _h in 0..field.capacity() {
-        let mut row = <Vec<Box<dyn MinCell>>>::with_capacity(width);
+        let mut row = <Vec<Box<dyn FieldCell>>>::with_capacity(width);
         for _w in 0..row.capacity() {
             row.push(EmptyCell::new());
         }
