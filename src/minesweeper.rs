@@ -9,14 +9,14 @@ pub enum OpenResult {
     Explode,
 }
 
-type MineField = Vec<Vec<Box<dyn FieldCell>>>;
+pub type MineField = Vec<Vec<Box<dyn FieldCell>>>;
 pub trait GameRender {
-    fn render(&self,_field: &MineField);
+    fn render(& mut self,_field: &MineField);
 }
 pub struct TextRender {}
 
 impl GameRender for TextRender {
-    fn render(&self,_field: &MineField) {
+    fn render(& mut self,_field: &MineField) {
         for row in _field.iter() {
             for el in row {
                 print!("{}",el);
@@ -30,7 +30,7 @@ impl GameRender for TextRender {
 pub struct DummyRender {}
 
 impl GameRender for DummyRender {
-    fn render(&self,_field: &MineField) {
+    fn render(&mut self,_field: &MineField) {
       
     }
 }
@@ -277,7 +277,7 @@ impl<T: GameRender> Minesweeper<T> {
             return false;
         }
     }
-    pub fn refresh(&self) {
+    pub fn refresh(&mut self) {
         self.render.render(&self.mine_field);
     }
 
