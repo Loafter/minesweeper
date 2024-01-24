@@ -14,18 +14,21 @@ pub enum WinMessage {
     ClickOnCord(usize, usize),
 }
 
-pub struct FltkRender {
+pub struct FltkRender<'a> {
     button_field: Vec<Vec<Button>>,
+    mine_fied: &'a mut Group,
 }
 
-impl FltkRender {
+
+
+impl  FltkRender<'_>  {
     pub fn new(
         height: usize,
         width: usize,
         menu_height: i32,
         sender: Sender<WinMessage>,
         mine_size: i32,
-        mut mine_fied: &mut Group,
+        mine_fied: &mut Group,
     ) -> FltkRender {
         let mut butt_field = Vec::<Vec<Button>>::with_capacity(height);
         for _h in 0..butt_field.capacity() {
@@ -45,18 +48,26 @@ impl FltkRender {
         }
         FltkRender {
             button_field: butt_field,
+            mine_fied:mine_fied
+        }
+    }
+    pub fn clearall(&mut self){
+        for ele in &self.button_field {
+            for e in ele {
+                self.mine_fied.remove(e)
+            }
         }
     }
 }
 
-impl GameRender for FltkRender {
+impl GameRender for FltkRender<'_> {
     fn render(&mut self, _field: &MineField) {
         for y in 0.._field.len() {
             for x in 0.._field[y].len() {
                 let cell = _field[y][x].as_ref();
                 if cell.is_marked() {
                     self.button_field[y][x].set_label("!");
-                }else  if cell.is_open() {
+                } else if cell.is_open() {
                     if cell.is_mine() {
                         self.button_field[y][x].set_label("*");
                     } else if cell.mines_arround() > 0 {

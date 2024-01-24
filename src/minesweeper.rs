@@ -11,30 +11,26 @@ pub enum OpenResult {
 
 pub type MineField = Vec<Vec<Box<dyn FieldCell>>>;
 pub trait GameRender {
-    fn render(& mut self,_field: &MineField);
+    fn render(&mut self, _field: &MineField);
 }
 pub struct TextRender {}
 
 impl GameRender for TextRender {
-    fn render(& mut self,_field: &MineField) {
+    fn render(&mut self, _field: &MineField) {
         for row in _field.iter() {
             for el in row {
-                print!("{}",el);
+                print!("{}", el);
             }
             println!("");
         }
     }
 }
 
-
 pub struct DummyRender {}
 
 impl GameRender for DummyRender {
-    fn render(&mut self,_field: &MineField) {
-      
-    }
+    fn render(&mut self, _field: &MineField) {}
 }
-
 
 pub trait FieldCell: Display {
     fn open(&mut self) -> OpenResult;
@@ -170,17 +166,17 @@ impl Display for EmptyCell {
     }
 }
 
-pub struct Minesweeper<T: GameRender> {
+pub struct Minesweeper<'a, T: GameRender> {
     height: usize,
     width: usize,
     total_mines: i64,
     unarmed_mines: i64,
     placed_flags: i64,
     mine_field: MineField,
-    render: T,
+    render: &'a mut T,
 }
 
-impl<T: GameRender> Display for Minesweeper<T> {
+impl<'a, T: GameRender> Display for Minesweeper<'a, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for row in self.mine_field.iter() {
             for el in row {
@@ -190,11 +186,16 @@ impl<T: GameRender> Display for Minesweeper<T> {
         }
         Ok(())
     }
-
 }
 
-impl<T: GameRender> Minesweeper<T> {
-    pub fn new(height: usize, width: usize, mut _count: usize, render: T) -> Minesweeper<T> {
+impl<'a, T: GameRender> Minesweeper<'a, T> {
+    pub fn new(
+        height: usize,
+        width: usize,
+        mut _count: usize,
+        render: &'a mut T,
+        
+    ) -> Minesweeper<'a, T> {
         let total_cells = height * width;
         if _count > total_cells {
             panic!("panic: to much mines")
@@ -211,7 +212,7 @@ impl<T: GameRender> Minesweeper<T> {
             placed_flags: 0,
             render: render,
         };
-        
+
         map_field.shuffle(&mut thread_rng());
         place_mine(_count, map_field, &mut ret_field);
         ret_field.refresh();
@@ -280,8 +281,6 @@ impl<T: GameRender> Minesweeper<T> {
     pub fn refresh(&mut self) {
         self.render.render(&self.mine_field);
     }
-
-
 }
 
 fn place_mine<T: GameRender>(

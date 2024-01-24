@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use minesweeper::minesweeper::{
-        DummyRender, EmptyCell, FieldCell, MinedCell, Minesweeper, OpenResult, TextRender
+        DummyRender, EmptyCell, FieldCell, MinedCell, Minesweeper, OpenResult
     };
     #[test]
     fn cell_empty_test() {
@@ -12,18 +12,19 @@ mod tests {
     #[test]
     #[should_panic]
     fn newgame_panic_test() {
-        Minesweeper::new(10, 10, 101, DummyRender {});
+        Minesweeper::new(10, 10, 101, &mut DummyRender {});
     }
    
     #[test]
     fn newgame_test() {
-        Minesweeper::new(10, 10, 100,DummyRender {});
-        Minesweeper::new(1, 1, 1,DummyRender {});
+        Minesweeper::new(10, 10, 100,&mut DummyRender {});
+        Minesweeper::new(1, 1, 1,&mut DummyRender {});
     }
 
     #[test]
     fn game_allopen_test() {
-        let mut g = Minesweeper::new(40, 20, 20,DummyRender {});
+        let dm=&mut DummyRender{};
+        let mut g = Minesweeper::new(40, 20, 20,dm);
         let (height, width) = g.get_width_height();
         let mut explode_count = 0;
         println!("{}", g);
@@ -40,14 +41,16 @@ mod tests {
     }
     #[test]
     fn game_open_test() {
-        let mut g = Minesweeper::new(20, 60, 3,DummyRender {});
+        let dm=&mut DummyRender{};
+        let mut g = Minesweeper::new(20, 60, 3,dm);
         println!("{}", g);
         g.open(10, 10);
         println!("{}", g);
     }
     #[test]
     fn game_open_many_test() {
-        let mut g = Minesweeper::new(20, 60, 100,DummyRender {});
+        let dm=&mut DummyRender{};
+        let mut g = Minesweeper::new(20, 60, 100,dm);
         println!("{}", g);
         g.open(10, 10);
         println!("{}", g);
@@ -56,7 +59,8 @@ mod tests {
 
     #[test]
     fn game_display_many_test() {
-        let mut g = Minesweeper::new(20, 60, 100,TextRender {});
+        let dm=&mut DummyRender{};
+        let mut g = Minesweeper::new(20, 60, 100,dm);
         println!();
         g.open(10, 10);
         println!();
@@ -66,7 +70,8 @@ mod tests {
     }
     #[test]
     fn game_mark_test() {
-        let mut g = Minesweeper::new(10, 15, 10,DummyRender {});
+        let dm=&mut DummyRender{};
+        let mut g = Minesweeper::new(10, 15, 10,dm);
         let (height, width) = g.get_width_height();
         for y in 0..height / 2 {
             for x in 0..width / 2 {
@@ -78,7 +83,8 @@ mod tests {
 
     #[test]
     fn game_display_test() {
-        let g = Minesweeper::new(15, 20, 60,DummyRender {});
+        let dm=&mut DummyRender{};
+        let g = Minesweeper::new(15, 20, 60,dm);
         println!("{}", g);
     }
     #[test]
