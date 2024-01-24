@@ -5,7 +5,7 @@ use fltk::{menu::MenuBar, prelude::*, *};
 
 use fltk::window::*;
 use minesweeper::fltfieldrender::{FltkRender, WinMessage};
-use minesweeper::minesweeper::Minesweeper;
+use minesweeper::minesweeper::{Minesweeper, OpenResult};
 
 const MENU_HEIGHT: i32 = 20;
 const MINE_SIZE: i32 = 20;
@@ -77,9 +77,17 @@ fn main() {
                 }
                 WinMessage::ClickOnCord(y, x) => {
                     if app::event_mouse_button() == app::MouseButton::Right {
-                        dialog::alert(1200, 900, &format!("y={} x={}", y, x));
+                        game.mark(y, x);
                     } else {
-                        game.open(y, x);
+                        if let Some(open_res)=game.open(y, x){
+                            if open_res==OpenResult::Explode{
+                                dialog::alert_default(&format!(
+                                    "Kaboom!!!!!!"
+                                ));
+                                win_mes_sender.send(WinMessage::NewGame);
+                            }
+                        }
+                     
                     }
                 }
             }

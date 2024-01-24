@@ -4,6 +4,10 @@ use std::any::Any;
 use std::collections::VecDeque;
 use std::fmt::Display;
 use std::usize;
+
+
+
+#[derive(PartialEq)]
 pub enum OpenResult {
     Opening(usize),
     Explode,
