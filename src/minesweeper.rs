@@ -273,27 +273,29 @@ impl<'a, T: GameRender> Minesweeper<'a, T> {
 
     pub fn mark(&mut self, y: usize, x: usize) -> bool {
         let cell = &mut self.mine_field[y][x];
-        if cell.mark() {
-            self.placed_flags += 1;
-            if cell.is_mine() {
-                self.unarmed_mines -= 1;
+        if !cell.is_open() {
+            if cell.mark() {
+                self.placed_flags += 1;
+                if cell.is_mine() {
+                    self.unarmed_mines -= 1;
+                }
+                self.refresh();
+                return self.checkwin();
+            } else {
+                if cell.is_mine() {
+                    self.unarmed_mines += 1;
+                }
+                self.placed_flags -= 1;
+                self.refresh();
+                return self.checkwin();
             }
-            self.refresh();
-            return self.checkwin();
-        } else {
-            if cell.is_mine() {
-                self.unarmed_mines += 1;
-            }
-            self.placed_flags -= 1;
-            self.refresh();
-            return self.checkwin();
         }
+        return false;
     }
     pub fn refresh(&mut self) {
         self.render.render(&self.mine_field);
     }
 }
-
 
 fn place_mine<T: GameRender>(
     mut _count: usize,
