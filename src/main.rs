@@ -12,11 +12,11 @@ const MENU_HEIGHT: i32 = 20;
 const MINE_SIZE: i32 = 20;
 const DEFAULT_FIELD_WIDTH: i32 = 30;
 const DEFAULT_FIELD_HEIGHT: i32 = 20;
-const DEFAULT_MINS: usize = 12;
+const DEFAULT_MINS: usize = 30;
 
 pub fn make_window(channel: &Sender<WinMessage>) -> (DoubleWindow, MenuBar, Group) {
     let mut main_window = Window::new(650, 450, DEFAULT_FIELD_WIDTH * MINE_SIZE,MENU_HEIGHT + DEFAULT_FIELD_HEIGHT * MINE_SIZE, None);
-    main_window.set_label(r#"FLTK rust Minsweeper"#);
+    main_window.set_label(r#"FLTK RUST Minsweeper"#);
     main_window.set_type(WindowType::Double);
     let mut flex_frame = Flex::new(0, 0, DEFAULT_FIELD_WIDTH*MINE_SIZE, MENU_HEIGHT + DEFAULT_FIELD_HEIGHT * MINE_SIZE, None);
     flex_frame.set_type(FlexType::Column);
