@@ -12,7 +12,7 @@ const MENU_HEIGHT: i32 = 20;
 const MINE_SIZE: i32 = 20;
 const DEFAULT_FIELD_WIDTH: i32 = 30;
 const DEFAULT_FIELD_HEIGHT: i32 = 20;
-const DEFAULT_MINS: usize = 60;
+const DEFAULT_MINS: usize = 12;
 
 pub fn make_window(channel: &Sender<WinMessage>) -> (DoubleWindow, MenuBar, Group) {
     let mut main_window = Window::new(650, 450, DEFAULT_FIELD_WIDTH * MINE_SIZE,MENU_HEIGHT + DEFAULT_FIELD_HEIGHT * MINE_SIZE, None);
