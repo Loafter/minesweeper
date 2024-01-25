@@ -16,7 +16,7 @@ const DEFAULT_MINS: usize = 270;
 
 pub fn make_window(channel: &Sender<WinMessage>) -> (DoubleWindow, MenuBar, Group) {
     let mut main_window = Window::new(277, 266, 300, 300, None);
-    main_window.set_label(r#"Fltk rust Minsweeper"#);
+    main_window.set_label(r#"FLTK rust Minsweeper"#);
     main_window.set_type(WindowType::Double);
     let mut flex_frame = Flex::new(0, 0, DEFAULT_FIELD_WIDTH*MINE_SIZE, 575, None);
     flex_frame.set_type(FlexType::Column);
@@ -36,6 +36,15 @@ pub fn make_window(channel: &Sender<WinMessage>) -> (DoubleWindow, MenuBar, Grou
         }
     });
 
+    let idx = game_menu.add_choice(r#"Help/About"#);
+    game_menu.at(idx).unwrap().set_callback({
+        move |_| {
+            dialog::alert_default(&format!("Created by Andrew Rose:)"));
+        }
+    });
+
+
+    
 
     let idx = game_menu.add_choice(r#"Game/Close"#);
     let channel3 = channel.clone();

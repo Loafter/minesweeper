@@ -32,9 +32,9 @@ impl NewGameDialog {
         let mut winp = input::Input::default().with_size(100, 0);
         let mut hinp = input::Input::default().with_size(100, 0);
         let mut minp = input::Input::default().with_size(100, 0);
-        winp.set_value("20");
+        winp.set_value("60");
         hinp.set_value("40");
-        minp.set_value("30");
+        minp.set_value("150");
         let mut ok = button::Button::default()
             .with_size(80, 0)
             .with_label("Start!");
