@@ -5,8 +5,6 @@ use std::collections::VecDeque;
 use std::fmt::Display;
 use std::usize;
 
-
-
 #[derive(PartialEq)]
 pub enum OpenResult {
     Opening(usize),
@@ -198,7 +196,6 @@ impl<'a, T: GameRender> Minesweeper<'a, T> {
         width: usize,
         mut _count: usize,
         render: &'a mut T,
-        
     ) -> Minesweeper<'a, T> {
         let total_cells = height * width;
         if _count > total_cells {
@@ -260,6 +257,16 @@ impl<'a, T: GameRender> Minesweeper<'a, T> {
         self.refresh();
         return Some(res);
     }
+    pub fn open_all(&mut self) {
+        for y in 0..self.mine_field.len() {
+            for x in 0..self.mine_field[0].len() {
+                if self.mine_field[y][x].is_mine() {
+                    self.mine_field[y][x].open();
+                }
+            }
+        }
+        self.refresh();
+    }
 
     pub fn mark(&mut self, y: usize, x: usize) -> bool {
         if self.mine_field[y][x].mark() {
@@ -269,6 +276,7 @@ impl<'a, T: GameRender> Minesweeper<'a, T> {
             self.placed_flags += 1;
             if self.unarmed_mines == 0 && self.placed_flags == self.total_mines.try_into().unwrap()
             {
+                self.refresh();
                 return true;
             }
             self.refresh();
