@@ -10,17 +10,17 @@ use minesweeper::newfielddialog::NewGameDialog;
 
 const MENU_HEIGHT: i32 = 20;
 const MINE_SIZE: i32 = 20;
-const DEFAULT_FIELD_WIDTH: i32 = 35;
-const DEFAULT_FIELD_HEIGHT: i32 = 20;
-const DEFAULT_MINS: usize = 7;
+const DEFAULT_FIELD_WIDTH: i32 = 60;
+const DEFAULT_FIELD_HEIGHT: i32 = 40;
+const DEFAULT_MINS: usize = 270;
 
 pub fn make_window(channel: &Sender<WinMessage>) -> (DoubleWindow, MenuBar, Group) {
     let mut main_window = Window::new(277, 266, 300, 300, None);
     main_window.set_label(r#"Fltk rust Minsweeper"#);
     main_window.set_type(WindowType::Double);
-    let mut flex_frame = Flex::new(0, 0, 700, 575, None);
+    let mut flex_frame = Flex::new(0, 0, DEFAULT_FIELD_WIDTH*MINE_SIZE, 575, None);
     flex_frame.set_type(FlexType::Column);
-    let mut game_menu = MenuBar::new(0, 0, 700, MENU_HEIGHT, None);
+    let mut game_menu = MenuBar::new(0, 0, DEFAULT_FIELD_WIDTH*MINE_SIZE, MENU_HEIGHT, None);
     let idx = game_menu.add_choice(r#"Game/New"#);
     let channel1 = channel.clone();
     game_menu.at(idx).unwrap().set_callback({
