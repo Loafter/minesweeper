@@ -209,7 +209,7 @@ impl<'a, T: GameRender> Minesweeper<'a, T> {
             height: height,
             width: width,
             total_mines: _count as i64,
-            unarmed_mines: 0,
+            unarmed_mines: _count as i64,
             placed_flags: 0,
             render: render,
         };
@@ -267,33 +267,33 @@ impl<'a, T: GameRender> Minesweeper<'a, T> {
         }
         self.refresh();
     }
+    fn checkwin(&self) -> bool {
+        self.unarmed_mines == 0 && self.placed_flags == self.total_mines.try_into().unwrap()
+    }
 
     pub fn mark(&mut self, y: usize, x: usize) -> bool {
-        if self.mine_field[y][x].mark() {
-            if self.mine_field[y][x].is_mine() {
+        let cell = &mut self.mine_field[y][x];
+        if cell.mark() {
+            self.placed_flags += 1;
+            if cell.is_mine() {
                 self.unarmed_mines -= 1;
             }
-            self.placed_flags += 1;
-            if self.unarmed_mines == 0 && self.placed_flags == self.total_mines.try_into().unwrap()
-            {
-                self.refresh();
-                return true;
-            }
             self.refresh();
-            return false;
+            return self.checkwin();
         } else {
-            if self.mine_field[y][x].is_mine() {
+            if cell.is_mine() {
                 self.unarmed_mines += 1;
             }
             self.placed_flags -= 1;
             self.refresh();
-            return false;
+            return self.checkwin();
         }
     }
     pub fn refresh(&mut self) {
         self.render.render(&self.mine_field);
     }
 }
+
 
 fn place_mine<T: GameRender>(
     mut _count: usize,

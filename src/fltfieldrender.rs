@@ -2,10 +2,7 @@ use std::usize;
 
 use crate::minesweeper::{GameRender, MineField};
 use fltk::{
-    app::Sender,
-    button::Button,
-    group::Group,
-    prelude::{GroupExt, WidgetBase, WidgetExt},
+    app::Sender, button::Button, enums::Color, group::Group, prelude::{GroupExt, WidgetBase, WidgetExt}
 };
 
 pub enum WinMessage {
@@ -64,17 +61,24 @@ impl GameRender for FltkRender<'_> {
     fn render(&mut self, _field: &MineField) {
         for y in 0.._field.len() {
             for x in 0.._field[y].len() {
-                let cell = _field[y][x].as_ref();
-                if cell.is_marked() {
-                    self.button_field[y][x].set_label("!");
-                } else if cell.is_open() {
+                let cell = _field[y][x].as_ref();  
+                let button = &mut self.button_field[y][x];
+                button.set_label_color(Color::by_index(0));
+                button.set_label_size(19);
+                if cell.is_open() {
                     if cell.is_mine() {
-                        self.button_field[y][x].set_label("*");
+                        button.set_label("☼");
+                        button.set_label_color(Color::by_index(1));
                     } else if cell.mines_arround() > 0 {
-                        self.button_field[y][x].set_label(&cell.mines_arround().to_string());
+                        button.set_label(&cell.mines_arround().to_string());
                     } else {
-                        self.button_field[y][x].hide();
-                    }
+                        button.hide();
+                    }               
+                }else if cell.is_marked() {
+                    button.set_label_color(Color::by_index(1));
+                    button.set_label("▼");
+                }else {
+                    button.set_label("");
                 }
             }
         }

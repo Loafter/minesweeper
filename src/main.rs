@@ -11,7 +11,7 @@ const MENU_HEIGHT: i32 = 20;
 const MINE_SIZE: i32 = 20;
 const DEFAULT_FIELD_WIDTH: i32 = 35;
 const DEFAULT_FIELD_HEIGHT: i32 = 20;
-const DEFAULT_MINS: usize = 10;
+const DEFAULT_MINS: usize = 7;
 
 pub fn make_window(channel: &Sender<WinMessage>) -> (DoubleWindow, MenuBar, Group) {
     let mut main_window = Window::new(277, 266, 300, 300, None);
@@ -42,7 +42,7 @@ pub fn make_window(channel: &Sender<WinMessage>) -> (DoubleWindow, MenuBar, Grou
     flex_frame.end();
     flex_frame.fixed(&flex_frame.child(0).unwrap(), 20);
     flex_frame.recalc();
-    main_window.make_resizable(true);
+    //main_window.make_resizable(true);
     main_window.end();
     main_window.show();
     (main_window, game_menu, mine_fied)
@@ -88,7 +88,10 @@ fn main() {
                 }
                 WinMessage::ClickOnCord(y, x) => {
                     if app::event_mouse_button() == app::MouseButton::Right {
-                        game.mark(y, x);
+                       if  game.mark(y, x){
+                        dialog::alert_default(&format!("You Win"));
+                        win_mes_sender.send(WinMessage::NewGame);
+                       }
                     } else {
                         if let Some(open_res) = game.open(y, x) {
                             if open_res == OpenResult::Explode {
