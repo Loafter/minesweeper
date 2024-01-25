@@ -3,7 +3,7 @@ No Recusrion for opening free cell\
 Fair no-try random mine placement\
 
 Building:\
-git clone https://github.com/Loafter/minesweeper.git\
+git clone https://github.com/Loafter/minesweeper.git \
 cd minesweeper\
 cargo build --release\
 ![miswiper](https://github.com/Loafter/minesweeper/assets/10071077/be5509fa-5a55-447c-a34d-2aed7bdfce33)
