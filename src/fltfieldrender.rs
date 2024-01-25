@@ -8,6 +8,7 @@ use fltk::{
 pub enum WinMessage {
     Close,
     NewGame,
+    UpdateGameParam,
     ClickOnCord(usize, usize),
 }
 
