@@ -10,15 +10,15 @@ use minesweeper::newfielddialog::NewGameDialog;
 
 const MENU_HEIGHT: i32 = 20;
 const MINE_SIZE: i32 = 20;
-const DEFAULT_FIELD_WIDTH: i32 = 60;
-const DEFAULT_FIELD_HEIGHT: i32 = 40;
-const DEFAULT_MINS: usize = 270;
+const DEFAULT_FIELD_WIDTH: i32 = 30;
+const DEFAULT_FIELD_HEIGHT: i32 = 20;
+const DEFAULT_MINS: usize = 60;
 
 pub fn make_window(channel: &Sender<WinMessage>) -> (DoubleWindow, MenuBar, Group) {
-    let mut main_window = Window::new(277, 266, 300, 300, None);
+    let mut main_window = Window::new(650, 450, DEFAULT_FIELD_WIDTH * MINE_SIZE,MENU_HEIGHT + DEFAULT_FIELD_HEIGHT * MINE_SIZE, None);
     main_window.set_label(r#"FLTK rust Minsweeper"#);
     main_window.set_type(WindowType::Double);
-    let mut flex_frame = Flex::new(0, 0, DEFAULT_FIELD_WIDTH*MINE_SIZE, 575, None);
+    let mut flex_frame = Flex::new(0, 0, DEFAULT_FIELD_WIDTH*MINE_SIZE, MENU_HEIGHT + DEFAULT_FIELD_HEIGHT * MINE_SIZE, None);
     flex_frame.set_type(FlexType::Column);
     let mut game_menu = MenuBar::new(0, 0, DEFAULT_FIELD_WIDTH*MINE_SIZE, MENU_HEIGHT, None);
     let idx = game_menu.add_choice(r#"Game/New"#);
@@ -54,15 +54,7 @@ pub fn make_window(channel: &Sender<WinMessage>) -> (DoubleWindow, MenuBar, Grou
         }
     });
     game_menu.end();
-    let mut mine_fied = Group::new(0, MENU_HEIGHT, 500, 700, None);
-    main_window.set_size(
-        DEFAULT_FIELD_WIDTH * MINE_SIZE,
-        MENU_HEIGHT + DEFAULT_FIELD_HEIGHT * MINE_SIZE,
-    );
-    mine_fied.set_size(
-        DEFAULT_FIELD_WIDTH * MINE_SIZE,
-        DEFAULT_FIELD_HEIGHT * MINE_SIZE,
-    );
+    let mine_fied = Group::new(0, MENU_HEIGHT, DEFAULT_FIELD_WIDTH * MINE_SIZE, MENU_HEIGHT + DEFAULT_FIELD_HEIGHT * MINE_SIZE, None);
     mine_fied.end();
     flex_frame.end();
     flex_frame.fixed(&flex_frame.child(0).unwrap(), 20);
@@ -98,10 +90,8 @@ fn main() {
                 }
                 WinMessage::NewGame => {
                     render.clearall();
-                    main_window.make_resizable(true);
                     main_window.set_size(width * MINE_SIZE, MENU_HEIGHT + height * MINE_SIZE);
                     mine_fied.set_size(width * MINE_SIZE, height * MINE_SIZE);
-                    main_window.make_resizable(false);
                     main_window.redraw();
                     render = FltkRender::new(
                         height as usize,
